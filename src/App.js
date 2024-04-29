@@ -5,19 +5,13 @@ import CreateProject from './components/CreateProject';
 import Logout from './components/Logout';
 import MenuBar from './components/MenuBar';
 import { Container } from 'react-bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
   return (
-    <Container>
-      <Router>
-        <Routes>
-          <Route exact path="/" element={Home} />
-          <Route path="/create-project" element={CreateProject} />
-          <Route path="/logout" element={Logout} />
-        </Routes>
-      </Router>
-      <MenuBar></MenuBar>
-    </Container>
+        <div className='App'>
+          <MenuBar/>
+        </div>
   );
 }
 

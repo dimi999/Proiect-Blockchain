@@ -1,21 +1,41 @@
+import Container from 'react-bootstrap/Container';
+import Nav from 'react-bootstrap/Nav';
+import Navbar from 'react-bootstrap/Navbar';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Link
+} from "react-router-dom";
+import Home from './Home';
+import CreateProject from './CreateProject';
+import Logout from './Logout';
+
 function MenuBar() {
   return (
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="#">Navbar</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-        <div class="navbar-nav">
-          <a class="nav-link active" aria-current="page" href="#">Home</a>
-          <a class="nav-link" href="#">Features</a>
-          <a class="nav-link" href="#">Pricing</a>
-          <a class="nav-link disabled">Disabled</a>
-        </div>
+    <Router>
+      <div>
+        <Navbar bg="dark" data-bs-theme="dark">
+          <Container>
+            <Navbar.Brand href="#home">Navbar</Navbar.Brand>
+            <Nav className="me-auto">
+              <Nav.Link as={Link} to="/home">Home</Nav.Link>
+              <Nav.Link as={Link} to="/create-project">Create Project</Nav.Link>
+              <Nav.Link as={Link} to="/logout">Logout</Nav.Link>
+            </Nav>
+          </Container>
+        </Navbar>
       </div>
-    </div>
-  </nav>
+
+      <div>
+        <Routes>
+          <Route path="/home" element={<Home/>}/>
+          <Route path="/create-project" element={<CreateProject/>}/>
+          <Route path="/logout" element={<Logout/>}/>
+          <Route path="/" element={<Home/>}/>
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
