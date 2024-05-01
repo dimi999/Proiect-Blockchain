@@ -36,6 +36,7 @@ function MenuBar() {
           <Route path="/logout" element={<Logout/>}/>
           <Route path="/profile" element={<Profile/>}/>
           <Route path="/" element={<Home/>}/>
+          <Route path="/upload"/>
         </Routes>
       </div>
     </Router>

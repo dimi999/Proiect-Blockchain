@@ -11,7 +11,6 @@ const [data, setData] = useState([]);
       .then((data) => setData(data))
   }, []);
 
-
   return (
     <div>
       <h2>Profile</h2>

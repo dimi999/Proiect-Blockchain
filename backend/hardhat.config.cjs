@@ -13,7 +13,7 @@ module.exports = {
     },
     sepolia: {
       url: "https://ethereum-sepolia-rpc.publicnode.com",
-      accounts: [""]
+      accounts: ["1ba763e8ba0409b85ded089dac003b5fadc403d304528f9f5d31495d59899eab"]
     }
   },
   defaultNetwork: "sepolia",
