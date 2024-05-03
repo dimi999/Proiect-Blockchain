@@ -36,6 +36,11 @@ app.get('/userProfile', async (req, res) => {
   res.send(UserProfile);
 });
 
+app.post('/updateUser', async (req, res) => {
+  const contract = get_user_contract();
+  const formData = req.data;
+});
+
 app.post('/upload', async (req, res) => {
   if (!req.files) {
     return res.status(400).send('No file uploaded.');
