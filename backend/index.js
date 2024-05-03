@@ -2,6 +2,7 @@ const express = require('express');
 const fileUpload = require('express-fileupload');
 const {ethers} = require('hardhat');
 const axios = require('axios');
+const UserProfile = require('./artifacts/contracts/UserProfile.sol/UserProfile.json');
 //const ipfsClient = require('ipfs-http-client');
 const app = express();
 app.use(fileUpload());
@@ -29,6 +30,10 @@ app.get('/home', (req, res) => {
 
 app.get('/profile', async (req, res) => {
   res.send({'balance': 150});
+});
+
+app.get('/userProfile', async (req, res) => {
+  res.send(UserProfile);
 });
 
 app.post('/upload', async (req, res) => {

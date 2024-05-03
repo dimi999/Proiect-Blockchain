@@ -3,9 +3,8 @@ pragma solidity ^0.8.0;
 
 contract UserProfile {
     struct User {
-        string name;
         address userAddress;
-        string email;
+        string status;
         uint256 balance;
     }
 
@@ -15,12 +14,11 @@ contract UserProfile {
     event UserUpdated(address indexed userAddress, string name, string email);
 
     function createUser(string calldata name, string calldata email) external returns (User memory){
-        require(bytes(users[msg.sender].name).length == 0, "User already exists");
+        require(bytes(users[msg.sender].status).length == 0, "User already exists");
         users[msg.sender] = User({
-            name: name,
             userAddress: msg.sender,
-            email: email,
-            balance: 1500
+            status: "Acount Created",
+            balance: 0
         });
         emit UserCreated(msg.sender, name, email);
         return users[msg.sender];

@@ -11,6 +11,7 @@ import Home from './Home';
 import CreateProject from './CreateProject';
 import Logout from './Logout';
 import Profile from './Profile';
+import Login from './Login';
 
 function MenuBar() {
   return (
@@ -24,6 +25,7 @@ function MenuBar() {
               <Nav.Link as={Link} to="/create-project">Create Project</Nav.Link>
               <Nav.Link as={Link} to="/logout">Logout</Nav.Link>
               <Nav.Link as={Link} to="/profile">Profile</Nav.Link>
+              <Nav.Link as={Link} to="/login">Login</Nav.Link>
             </Nav>
           </Container>
         </Navbar>
@@ -37,6 +39,7 @@ function MenuBar() {
           <Route path="/profile" element={<Profile/>}/>
           <Route path="/" element={<Home/>}/>
           <Route path="/upload"/>
+          <Route path="/login" element={<Login/>}/>
         </Routes>
       </div>
     </Router>

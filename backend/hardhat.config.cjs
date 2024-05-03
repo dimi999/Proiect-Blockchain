@@ -3,6 +3,7 @@
 /** @type import('hardhat/config').HardhatUserConfig */
 require("@nomicfoundation/hardhat-ignition-ethers");
 require("@nomicfoundation/hardhat-ethers");
+require('dotenv').config()
 module.exports = {
   networks: {
     hardhat: {
@@ -13,7 +14,7 @@ module.exports = {
     },
     sepolia: {
       url: "https://ethereum-sepolia-rpc.publicnode.com",
-      accounts: ["1ba763e8ba0409b85ded089dac003b5fadc403d304528f9f5d31495d59899eab"]
+      accounts: [process.env.PRIVATE_KEY]
     }
   },
   defaultNetwork: "sepolia",
