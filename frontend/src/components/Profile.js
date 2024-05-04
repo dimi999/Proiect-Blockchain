@@ -18,17 +18,24 @@ useEffect(() => {
   }, []);
 
 useEffect(() => {
-    fetch('/profile')
+  console.log(account);
+    fetch('/profile', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        "address" : account,
+      }), 
+    })
       .then((response) => response.json())
       .then((data) => setData(data))
-  }, []);
+  }, [account]);
 
 useEffect(() => {
     const getContract = async () => {
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         const signer = provider.getSigner();
         const userProfileContract = new ethers.Contract(
-            '0x74730B0b91e8A5506CEd401534bc45a80AFAcF94',
+            '0x5C78648C79795A19C83C5edFdc02757DB08deecE',
             userProfile.abi,
             signer
         );
@@ -66,7 +73,7 @@ useEffect(() => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
-    formData.address = account;
+    formData.append('address', account);
 
     const config = {
       headers: {
@@ -74,7 +81,7 @@ useEffect(() => {
       },
     };
 
-    axios.post('/updateProfile', formData, config).then((response) => {
+    axios.post('/updateUser', formData, config).then((response) => {
       console.log(response.data);
     });
   };
@@ -86,12 +93,12 @@ useEffect(() => {
         {/* Your form fields go here */}
         <label>
           Email:
-          <input type="email" name="email" value={data.email}/>
+          <input type="email" name="email" defaultValue={data[3]}/>
         </label>
         <br />
         <label>
           Name:
-          <input type="text" name="nume" value={data.name}/>
+          <input type="text" name="nume" defaultValue={data[2]}/>
         </label>
         <br />
         <button type="submit">Create Project</button>

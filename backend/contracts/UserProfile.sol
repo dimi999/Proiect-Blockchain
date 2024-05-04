@@ -26,11 +26,11 @@ contract UserProfile {
         return users[msg.sender];
     }
 
-    function updateUser(string calldata name, string calldata email) external {
-        require(bytes(users[msg.sender].status).length != 0, "User does not exist");
-        users[msg.sender].name = name;
-        users[msg.sender].email = email;
-        emit UserUpdated(msg.sender, name, email);
+    function updateUser(address userAddress, string calldata name, string calldata email) external {
+        require(bytes(users[userAddress].status).length != 0, "User does not exist");
+        users[userAddress].name = name;
+        users[userAddress].email = email;
+        emit UserUpdated(userAddress, name, email);
     }
 
     function getUser(address userAddress) external view returns (User memory) {

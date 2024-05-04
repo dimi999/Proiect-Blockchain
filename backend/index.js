@@ -8,7 +8,7 @@ const app = express();
 app.use(fileUpload());
 const port = 5000; // You can choose any port
 
-const users_address = '0x74730B0b91e8A5506CEd401534bc45a80AFAcF94';
+const users_address = '0x5C78648C79795A19C83C5edFdc02757DB08deecE';
 const { apillonStorageAPI } = require('./apillon-api');
 
 async function get_user_contract() {
@@ -18,6 +18,7 @@ async function get_user_contract() {
   );
   return contract;
 }
+
 app.use(express.json());
 
 app.get('/', (req, res) => {
@@ -28,8 +29,16 @@ app.get('/home', (req, res) => {
   res.send({'mydata': 'Hello from the Node.js backend!'});
 });
 
-app.get('/profile', async (req, res) => {
-  res.send({'balance': 150});
+app.post('/profile', async (req, res) => {
+  const {address} = req.body;
+  if (address == undefined) {
+    res.send({name: '', email: ''});
+    return;
+  }
+  const contract = await get_user_contract();
+  const user = await contract.getUser(address);
+  console.log(user);
+  res.send(user);
 });
 
 app.get('/userProfile', async (req, res) => {
@@ -37,8 +46,10 @@ app.get('/userProfile', async (req, res) => {
 });
 
 app.post('/updateUser', async (req, res) => {
-  const contract = get_user_contract();
-  const formData = req.data;
+  const contract = await get_user_contract();
+  const formData = req.body;
+  await contract.updateUser(formData.address, formData.nume, formData.email);
+  res.send('');
 });
 
 app.post('/upload', async (req, res) => {

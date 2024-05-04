@@ -18,7 +18,7 @@ function Login() {
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             const signer = provider.getSigner();
             const userProfileContract = new ethers.Contract(
-                '0x74730B0b91e8A5506CEd401534bc45a80AFAcF94',
+                '0x5C78648C79795A19C83C5edFdc02757DB08deecE',
                 userProfile.abi,
                 signer
             );
@@ -56,7 +56,7 @@ function Login() {
     const createUser = async () => {
         // Call a function on the smart contract
           try {
-            const result = await contract.createUser('cineva', 'altcineva');
+            const result = await contract.createUser();
             console.log('Result:', result);
           } catch (error) {
             console.error(error);

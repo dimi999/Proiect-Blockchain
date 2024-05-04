@@ -39,6 +39,7 @@ function MenuBar() {
           <Route path="/profile" element={<Profile/>}/>
           <Route path="/" element={<Home/>}/>
           <Route path="/upload"/>
+          <Route path="/updateUser"/>
           <Route path="/login" element={<Login/>}/>
         </Routes>
       </div>
