@@ -7,14 +7,26 @@ const UserProfile = require('./artifacts/contracts/UserProfile.sol/UserProfile.j
 const app = express();
 app.use(fileUpload());
 const port = 5000; // You can choose any port
+require('dotenv').config();
+const formidable = require('formidable');
 
 const users_address = '0x5C78648C79795A19C83C5edFdc02757DB08deecE';
+const funding_address = '0x9faE77Ec40d91fCB04715fFd48a872218f716C25';
 const { apillonStorageAPI } = require('./apillon-api');
+const bucketUUID = process.env.BUCKET_UUID;
 
 async function get_user_contract() {
   const MyContract = await ethers.getContractFactory("UserProfile");
   const contract = MyContract.attach(
     users_address
+  );
+  return contract;
+}
+
+async function get_funding_contract() {
+  const MyContract = await ethers.getContractFactory("Funding");
+  const contract = MyContract.attach(
+    funding_address
   );
   return contract;
 }
@@ -52,31 +64,115 @@ app.post('/updateUser', async (req, res) => {
   res.send('');
 });
 
+
 app.post('/upload', async (req, res) => {
-  if (!req.files) {
+  // Check if a file was uploaded via the `file` field
+  if (!req.files || !req.files.file) {
     return res.status(400).send('No file uploaded.');
   }
 
-  const response = await apillonStorageAPI.post('/buckets/<session_id>/upload', 
-  {
-    files: [{
-      fileName: 'file1' 
-    }]
+  // Access the uploaded file via express-fileupload's `req.files`
+  const uploadedFile = req.files.file;
+
+
+  // Step 1: Initialize the Apillon file upload session
+  const response = await apillonStorageAPI.post(`/buckets/${bucketUUID}/upload`, {
+    files: [{ fileName: uploadedFile.name }],
   });
 
   const responses = response.data.data.files;
-  console.log(responses);
-  
-  for(let x of responses) {
+  const sessionUuid = response.data.data.sessionUuid;
+
+  // Step 2: Upload each file to Apillon using the PUT method
+  for (let x of responses) {
     const uploadUrl = x.url;
-    axios.put(uploadUrl, { data: req.files })
+
+    try {
+      // Upload directly using the file buffer with the correct content type
+      await axios.put(uploadUrl, uploadedFile.data, {
+        headers: {
+          'Content-Type': uploadedFile.mimetype, // Use the MIME type of the uploaded file
+        },
+      });
+
+    } catch (err) {
+      console.error("Error uploading file to Apillon:", err);
+      return res.status(500).send("Error uploading file to Apillon.");
+    }
   }
 
-  const response2 = await apillonStorageAPI.post(`/buckets/<session_id>/upload/${response.data.data.sessionUuid}/end`)
+  // Step 3: Finalize the upload session
+  try {
+    await apillonStorageAPI.post(`/buckets/${bucketUUID}/upload/${sessionUuid}/end`);
+  } catch (err) {
+    console.error("Error finalizing Apillon session:", err);
+    return res.status(500).send("Error finalizing Apillon session.");
+  }
 
   res.send('File uploaded successfully.');
 });
 
+
+
+
+app.post('/create-campaign', async (req, res) => {
+  const { title, description, goal, address, ipfsUrl } = req.body;
+
+  // Goal should be in wei, so convert it to a proper format
+  const goalInWei = ethers.parseEther(goal);
+
+  try {
+    // Get the Funding contract instance
+    const fundingContract = await get_funding_contract();
+    
+    // Interact with the smart contract to create a new campaign
+    const tx = await fundingContract.createCampaign(
+      title,
+      `${description} (Image: ${ipfsUrl})`,
+      goalInWei,
+      { from: address }
+    );
+
+    // Wait for the transaction to be mined
+    await tx.wait();
+
+    res.status(200).send('Campaign successfully created!');
+    console.log('Campaign successfully created!');
+  } catch (error) {
+    console.error('Error creating campaign:', error);
+    res.status(500).send('Error creating campaign');
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server is running on port number ${port}`);
+});
+
+// Add this new endpoint after your other API endpoints
+
+app.get('/campaigns', async (req, res) => {
+  try {
+    const fundingContract = await get_funding_contract();
+    const campaignCount = await fundingContract.campaigns.length;
+
+    // Retrieve information for each campaign
+    let campaigns = [];
+    for (let i = 0; i < campaignCount; i++) {
+      const campaign = await fundingContract.getCampaignInfo(i);
+      campaigns.push({
+        title: campaign[0],
+        description: campaign[1],
+        owner: campaign[2],
+        goal: ethers.utils.formatEther(campaign[3]), // Convert to ETH
+        raised: ethers.utils.formatEther(campaign[4]), // Convert to ETH
+        active: campaign[5],
+        contributors: campaign[6],
+      });
+    }
+
+    res.status(200).json(campaigns);
+  } catch (err) {
+    console.error('Error fetching campaigns:', err);
+    res.status(500).send('Error fetching campaigns.');
+  }
 });
