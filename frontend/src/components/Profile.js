@@ -81,9 +81,7 @@ useEffect(() => {
       },
     };
 
-    axios.post('/updateUser', formData, config).then((response) => {
-      console.log(response.data);
-    });
+    const response = await contract.updateUser(account, event.target.nume, event.target.email);
   };
 
   return (
