@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import "./UserProfile.sol";
 
 contract Funding {
-    UserProfile public userProfile;
+    // UserProfile public userProfile;
 
     struct FundingCampaign {
         string title;
@@ -12,8 +12,7 @@ contract Funding {
         address owner;
         uint256 goal;
         uint256 raised;
-        bool active;
-        mapping(address => uint256) contributions;
+        bool active;   
         address[] contributors;
     }
 
@@ -23,18 +22,19 @@ contract Funding {
     event ContributionMade(uint256 indexed campaignId, address indexed contributor, uint256 amount);
     event CampaignClosed(uint256 indexed campaignId);
 
-    constructor(UserProfile _userProfile) {
-        userProfile = _userProfile;
-    }
+    // constructor(UserProfile _userProfile) {
+    //     userProfile = _userProfile;
+    // }
 
     function createCampaign(
         string calldata title,
         string calldata description,
         uint256 goal
     ) external {
-        require(userProfile.getUser(msg.sender).userAddress == msg.sender, "User profile does not exist");
-
-        FundingCampaign storage campaign = campaigns.push();
+        // require(userProfile.getUser(msg.sender).userAddress == msg.sender, "User profile does not exist");
+        uint256 idx = campaigns.length;
+        campaigns.push();
+        FundingCampaign storage campaign = campaigns[idx];
         campaign.title = title;
         campaign.description = description;
         campaign.owner = msg.sender;
