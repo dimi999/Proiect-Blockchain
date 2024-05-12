@@ -2,26 +2,17 @@ const express = require('express');
 const fileUpload = require('express-fileupload');
 const {ethers} = require('hardhat');
 const axios = require('axios');
-const UserProfile = require('./artifacts/contracts/UserProfile.sol/UserProfile.json');
-//const ipfsClient = require('ipfs-http-client');
+
 const app = express();
 app.use(fileUpload());
 const port = 5000; // You can choose any port
 require('dotenv').config();
-const formidable = require('formidable');
 
-const users_address = '0x5C78648C79795A19C83C5edFdc02757DB08deecE';
+
 const funding_address = '0x126793D0c82554740F30655A1475deE0a63c0775';
 const { apillonStorageAPI } = require('./apillon-api');
+const { user_contract } = require('./scripts/UserContract');
 const bucketUUID = process.env.BUCKET_UUID;
-
-async function get_user_contract() {
-  const MyContract = await ethers.getContractFactory("UserProfile");
-  const contract = MyContract.attach(
-    users_address
-  );
-  return contract;
-}
 
 async function get_funding_contract() {
   const MyContract = await ethers.getContractFactory("Funding");
@@ -47,8 +38,7 @@ app.post('/profile', async (req, res) => {
     res.send({name: '', email: ''});
     return;
   }
-  const contract = await get_user_contract();
-  const user = await contract.getUser(address);
+  const user = await user_contract.getUser(address);
   console.log(user);
   res.send(user);
 });
@@ -56,14 +46,6 @@ app.post('/profile', async (req, res) => {
 app.get('/userProfile', async (req, res) => {
   res.send(UserProfile);
 });
-
-app.post('/updateUser', async (req, res) => {
-  const contract = await get_user_contract();
-  const formData = req.body;
-  await contract.updateUser(formData.address, formData.nume, formData.email);
-  res.send('');
-});
-
 
 app.post('/upload', async (req, res) => {
   // Check if a file was uploaded via the `file` field
@@ -111,9 +93,6 @@ app.post('/upload', async (req, res) => {
 
   res.send('File uploaded successfully.');
 });
-
-
-
 
 app.post('/create-campaign', async (req, res) => {
   const { title, description, goal, address, ipfsUrl } = req.body;

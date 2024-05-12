@@ -50,11 +50,11 @@ contract Funding {
         FundingCampaign storage campaign = campaigns[campaignId];
         require(campaign.active, "Campaign is closed");
 
-        if (campaign.contributions[msg.sender] == 0) {
-            campaign.contributors.push(msg.sender);
-        }
+        // if (campaign.contributions[msg.sender] == 0) {
+        //     campaign.contributors.push(msg.sender);
+        // }
 
-        campaign.contributions[msg.sender] += msg.value;
+        //campaign.contributions[msg.sender] += msg.value;
         campaign.raised += msg.value;
 
         emit ContributionMade(campaignId, msg.sender, msg.value);
@@ -97,6 +97,7 @@ contract Funding {
         require(campaignId < campaigns.length, "Invalid campaign ID");
         FundingCampaign storage campaign = campaigns[campaignId];
         
-        return campaign.contributions[contributor];
+        return 0;
+        //return campaign.contributions[contributor];
     }
 }
