@@ -13,12 +13,14 @@ contract Funding {
         uint256 raised;
         bool active;
         address[] contributors;
+        uint256[] contributions;
+        string ipfsUuid;
     }
 
     FundingCampaign[] public campaigns;
 
-    event CampaignCreated(uint256 indexed campaignId, string title, string description, address owner, uint256 goal);
-    event ContributionMade(uint256 indexed campaignId, address indexed contributor, uint256 amount);
+    event CampaignCreated(uint256 indexed campaignId, string title, string description, address owner, uint256 goal, string ipfsUuid);
+    event ContributionMade(uint256 indexed campaignId, address contributor, uint256 amount);
     event CampaignClosed(uint256 indexed campaignId);
 
     event Debug(string message, uint256 value);
@@ -26,7 +28,8 @@ contract Funding {
     function createCampaign(
         string calldata title,
         string calldata description,
-        uint256 goal
+        uint256 goal,
+        string calldata ipfsUuid
     ) external {
         emit Debug("Creating campaign, current count", campaigns.length);
         uint256 idx = campaigns.length;
@@ -38,8 +41,9 @@ contract Funding {
         campaign.goal = goal;
         campaign.raised = 0;
         campaign.active = true;
+        campaign.ipfsUuid = ipfsUuid;
 
-        emit CampaignCreated(campaigns.length - 1, title, description, msg.sender, goal);
+        emit CampaignCreated(campaigns.length - 1, title, description, msg.sender, goal, ipfsUuid);
         emit Debug("Campaign created, new count", campaigns.length);
     }
 
@@ -55,20 +59,21 @@ contract Funding {
     }
 
 
-    // function contribute(uint256 campaignId) external payable {
-    //     require(campaignId < campaigns.length, "Invalid campaign ID");
-    //     FundingCampaign storage campaign = campaigns[campaignId];
-    //     require(campaign.active, "Campaign is closed");
+    function contribute(uint256 campaignId) external payable {
+        require(campaignId < campaigns.length, "Invalid campaign ID");
+        FundingCampaign storage campaign = campaigns[campaignId];
+        require(campaign.active, "Campaign is closed");
 
-    //     if (campaign.contributions[msg.sender] == 0) {
-    //         campaign.contributors.push(msg.sender);
-    //     }
 
-    //     campaign.contributions[msg.sender] += msg.value;
-    //     campaign.raised += msg.value;
+        campaign.contributions.push(msg.value);
+        campaign.contributors.push(msg.sender);
+        campaign.raised += msg.value;
 
-    //     emit ContributionMade(campaignId, msg.sender, msg.value);
-    // }
+        // send the funds to the campaign owner
+        payable(campaign.owner).transfer(msg.value);
+
+        emit ContributionMade(campaignId, msg.sender, msg.value);
+    }
 
     function closeCampaign(uint256 campaignId) external {
         require(campaignId < campaigns.length, "Invalid campaign ID");
@@ -87,7 +92,9 @@ contract Funding {
         uint256 goal,
         uint256 raised,
         bool active,
-        address[] memory contributors
+        address[] memory contributors,
+        uint256[] memory contributions,
+        string memory ipfsUuid
     ) {
         require(campaignId < campaigns.length, "Invalid campaign ID");
         FundingCampaign storage campaign = campaigns[campaignId];
@@ -99,7 +106,9 @@ contract Funding {
             campaign.goal,
             campaign.raised,
             campaign.active,
-            campaign.contributors
+            campaign.contributors,
+            campaign.contributions,
+            campaign.ipfsUuid
         );
     }
 

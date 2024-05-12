@@ -33,7 +33,7 @@ function CreateProject() {
     event.preventDefault();
     const formData = new FormData();
     formData.append('file', file);
-    let ipfsUrl = '';
+    let fileUuid = '';
 
     const config = {
       headers: {
@@ -42,11 +42,13 @@ function CreateProject() {
     };
     try {
       const response = await axios.post('/upload', formData, config);
-      ipfsUrl = response.data; // Adjust based on the response structure
+      fileUuid = response.data; // Adjust based on the response structure
     } catch (error) {
       console.error('Error uploading image to IPFS:', error);
       return;
     }
+
+    console.log('File UUID:', fileUuid)
 
     // Prepare campaign data to submit
     const campaignData = {
@@ -54,7 +56,7 @@ function CreateProject() {
       description,
       goal,
       address: userAddress,
-      ipfsUrl,
+      fileUuid,
     };
 
     // Call the backend to create the campaign
@@ -97,7 +99,7 @@ function CreateProject() {
         <button type="submit">Create Project</button>
       </form>
       
-      <h2>Existing Campaigns</h2>
+      {/* <h2>Existing Campaigns</h2>
       <div>
         {campaigns.map((campaign, index) => (
           <div key={index} className="card">
@@ -109,7 +111,7 @@ function CreateProject() {
             <p><strong>Active:</strong> {campaign.active ? 'Yes' : 'No'}</p>
           </div>
         ))}
-      </div>
+      </div> */}
     </div>
   );
 }

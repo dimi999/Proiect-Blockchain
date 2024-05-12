@@ -1,17 +1,17 @@
 const express = require('express');
-const fileUploadd = require('express-fileupload');
+const fileUpload = require('express-fileupload');
 const {ethers} = require('hardhat');
 const axios = require('axios');
 const UserProfile = require('./artifacts/contracts/UserProfile.sol/UserProfile.json');
 //const ipfsClient = require('ipfs-http-client');
 const app = express();
-// app.use(fileUpload());
+app.use(fileUpload());
 const port = 5000; // You can choose any port
 require('dotenv').config();
 const formidable = require('formidable');
 
 const users_address = '0x5C78648C79795A19C83C5edFdc02757DB08deecE'; // change this to your deployed contract address
-const funding_address = '0xEfC0C53471217D18828884116255e5A42861c95e'; // change this to your deployed contract address
+const funding_address = '0x3732fAf3c1a65fB858012297BAea953E465ED413'; // change this to your deployed contract address
 const { apillonStorageAPI } = require('./apillon-api');
 const bucketUUID = process.env.BUCKET_UUID;
 
@@ -86,6 +86,7 @@ app.post('/upload', async (req, res) => {
   // Step 2: Upload each file to Apillon using the PUT method
   for (let x of responses) {
     const uploadUrl = x.url;
+    fileUuid = x.fileUuid;
 
     try {
       // Upload directly using the file buffer with the correct content type
@@ -102,21 +103,21 @@ app.post('/upload', async (req, res) => {
   }
 
   // Step 3: Finalize the upload session
+
   try {
-    await apillonStorageAPI.post(`/buckets/${bucketUUID}/upload/${sessionUuid}/end`);
+    end_response = await apillonStorageAPI.post(`/buckets/${bucketUUID}/upload/${sessionUuid}/end`);
   } catch (err) {
     console.error("Error finalizing Apillon session:", err);
     return res.status(500).send("Error finalizing Apillon session.");
   }
-
-  res.send('File uploaded successfully.');
+  res.status(200).send(fileUuid);
 });
 
 
 
 
 app.post('/create-campaign', async (req, res) => {
-  const { title, description, goal, address, ipfsUrl } = req.body;
+  const { title, description, goal, address, fileUuid } = req.body;
 
   // Goal should be in wei, so convert it to a proper format
   const goalInWei = ethers.parseEther(goal);
@@ -128,8 +129,9 @@ app.post('/create-campaign', async (req, res) => {
     // Interact with the smart contract to create a new campaign
     const tx = await fundingContract.createCampaign(
       title,
-      `${description} (Image: ${ipfsUrl})`,
+      description,
       goalInWei,
+      fileUuid,
       { from: address }
     );
 
@@ -148,64 +150,41 @@ app.listen(port, () => {
   console.log(`Server is running on port number ${port}`);
 });
 
-// app.get('/campaigns', async (req, res) => {
-//   try {
-//     const fundingContract = await get_funding_contract();
-//     const campaignCount = await fundingContract.getCampaignCount();
-//     const count = Number(campaignCount.toString());  // Convert BigInt to Number
-
-//     let campaigns = [];
-//     for (let i = 0; i < count; i++) {
-//       const campaign = await fundingContract.getCampaignInfo(i);
-
-//       // Debugging each campaign data
-//       console.log(`Campaign ${i}:`, campaign);
-
-//       // Ensure all elements are defined
-//       if(campaign[3] !== undefined && campaign[4] !== undefined) {
-//         campaigns.push({
-//           title: campaign[0],
-//           description: campaign[1],
-//           owner: campaign[2],
-//           goal: ethers.utils.formatEther(campaign[3]),
-//           raised: ethers.utils.formatEther(campaign[4]),
-//           active: campaign[5],
-//           contributors: campaign[6].length // Assuming campaign[6] is an array of addresses
-//         });
-//       }
-//     }
-
-//     res.status(200).json(campaigns);
-//   } catch (err) {
-//     console.error('Error fetching campaigns:', err);
-//     res.status(500).send('Error fetching campaigns.');
-//   }
-// });
 
 app.get('/campaigns', async (req, res) => {
+
   try {
     const fundingContract = await get_funding_contract();
     const campaignCount = await fundingContract.getCampaignCount();
-    const count = Number(campaignCount.toString());  // Convert BigInt to Number
+    const count = Number(campaignCount.toString());
 
     let campaigns = [];
     for (let i = 0; i < count; i++) {
       const campaign = await fundingContract.getCampaignInfo(i);
 
-      console.log(`Campaign ${i}:`, campaign);
-
-      // Convert BigInt to a string to be compatible with formatEther
       const goalEther = ethers.formatEther(campaign[3].toString());
       const raisedEther = ethers.formatEther(campaign[4].toString());
 
+      const fileUuid = campaign[7];
+      let ipfsUrl = '';
+      const response = await apillonStorageAPI.get(`/buckets/${bucketUUID}/files/${fileUuid}`);
+      if (response.data.data.link == null) {
+        ipfsUrl = 'https://cdn.pixabay.com/photo/2024/04/25/06/50/banana-8719086_1280.jpg';
+      }
+      else {
+        ipfsUrl = response.data.data.link;
+      }
+
       campaigns.push({
+        id: i,
         title: campaign[0],
         description: campaign[1],
         owner: campaign[2],
         goal: goalEther,
         raised: raisedEther,
         active: campaign[5],
-        contributors: campaign[6].length // Assuming campaign[6] is an array of addresses
+        contributors: campaign[6].length, // Assuming campaign[6] is an array of addresses
+        ipfsUrl: ipfsUrl,
       });
     }
 
@@ -213,5 +192,20 @@ app.get('/campaigns', async (req, res) => {
   } catch (err) {
     console.error('Error fetching campaigns:', err);
     res.status(500).send('Error fetching campaigns.');
+  }
+});
+
+app.post('/contribute', async (req, res) => {
+  const { amount, campaignId } = req.body;
+
+  try {
+    const fundingContract = await get_funding_contract();
+    const tx = await fundingContract.contribute(campaignId, { value: ethers.parseEther(amount) });
+    await tx.wait();
+
+    res.status(200).send('Contribution successful!');
+  } catch (error) {
+    console.error('Error contributing to campaign:', error);
+    res.status(500).send('Error contributing to campaign');
   }
 });
