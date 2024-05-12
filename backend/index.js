@@ -165,7 +165,7 @@ app.get('/campaigns', async (req, res) => {
       const goalEther = ethers.formatEther(campaign[3].toString());
       const raisedEther = ethers.formatEther(campaign[4].toString());
 
-      const fileUuid = campaign[7];
+      const fileUuid = campaign[8];
       let ipfsUrl = '';
       const response = await apillonStorageAPI.get(`/buckets/${bucketUUID}/files/${fileUuid}`);
       if (response.data.data.link == null) {
