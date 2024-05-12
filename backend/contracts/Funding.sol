@@ -4,7 +4,6 @@ pragma solidity ^0.8.0;
 import "./UserProfile.sol";
 
 contract Funding {
-    // UserProfile public userProfile;
 
     struct FundingCampaign {
         string title;
@@ -13,7 +12,6 @@ contract Funding {
         uint256 goal;
         uint256 raised;
         bool active;
-        mapping(address => uint256) contributions;
         address[] contributors;
     }
 
@@ -23,18 +21,17 @@ contract Funding {
     event ContributionMade(uint256 indexed campaignId, address indexed contributor, uint256 amount);
     event CampaignClosed(uint256 indexed campaignId);
 
-    // constructor(UserProfile _userProfile) {
-    //     userProfile = _userProfile;
-    // }
+    event Debug(string message, uint256 value);
 
     function createCampaign(
         string calldata title,
         string calldata description,
         uint256 goal
     ) external {
-        // require(userProfile.getUser(msg.sender).userAddress == msg.sender, "User profile does not exist");
-
-        FundingCampaign storage campaign = campaigns.push();
+        emit Debug("Creating campaign, current count", campaigns.length);
+        uint256 idx = campaigns.length;
+        campaigns.push();
+        FundingCampaign storage campaign = campaigns[idx];
         campaign.title = title;
         campaign.description = description;
         campaign.owner = msg.sender;
@@ -43,22 +40,35 @@ contract Funding {
         campaign.active = true;
 
         emit CampaignCreated(campaigns.length - 1, title, description, msg.sender, goal);
+        emit Debug("Campaign created, new count", campaigns.length);
     }
 
-    function contribute(uint256 campaignId) external payable {
-        require(campaignId < campaigns.length, "Invalid campaign ID");
-        FundingCampaign storage campaign = campaigns[campaignId];
-        require(campaign.active, "Campaign is closed");
-
-        if (campaign.contributions[msg.sender] == 0) {
-            campaign.contributors.push(msg.sender);
-        }
-
-        campaign.contributions[msg.sender] += msg.value;
-        campaign.raised += msg.value;
-
-        emit ContributionMade(campaignId, msg.sender, msg.value);
+    // Explicit getter for the campaigns array
+    function getCampaign(uint index) public view returns (FundingCampaign memory) {
+        require(index < campaigns.length, "Campaign does not exist.");
+        return campaigns[index];
     }
+
+    // Function to get total number of campaigns
+    function getCampaignCount() public view returns (uint) {
+        return campaigns.length;
+    }
+
+
+    // function contribute(uint256 campaignId) external payable {
+    //     require(campaignId < campaigns.length, "Invalid campaign ID");
+    //     FundingCampaign storage campaign = campaigns[campaignId];
+    //     require(campaign.active, "Campaign is closed");
+
+    //     if (campaign.contributions[msg.sender] == 0) {
+    //         campaign.contributors.push(msg.sender);
+    //     }
+
+    //     campaign.contributions[msg.sender] += msg.value;
+    //     campaign.raised += msg.value;
+
+    //     emit ContributionMade(campaignId, msg.sender, msg.value);
+    // }
 
     function closeCampaign(uint256 campaignId) external {
         require(campaignId < campaigns.length, "Invalid campaign ID");
@@ -93,10 +103,10 @@ contract Funding {
         );
     }
 
-    function getContribution(uint256 campaignId, address contributor) external view returns (uint256) {
-        require(campaignId < campaigns.length, "Invalid campaign ID");
-        FundingCampaign storage campaign = campaigns[campaignId];
+    // function getContribution(uint256 campaignId, address contributor) external view returns (uint256) {
+    //     require(campaignId < campaigns.length, "Invalid campaign ID");
+    //     FundingCampaign storage campaign = campaigns[campaignId];
         
-        return campaign.contributions[contributor];
-    }
+    //     return campaign.contributions[contributor];
+    // }
 }

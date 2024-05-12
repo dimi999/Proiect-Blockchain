@@ -1,17 +1,17 @@
 const express = require('express');
-const fileUpload = require('express-fileupload');
+const fileUploadd = require('express-fileupload');
 const {ethers} = require('hardhat');
 const axios = require('axios');
 const UserProfile = require('./artifacts/contracts/UserProfile.sol/UserProfile.json');
 //const ipfsClient = require('ipfs-http-client');
 const app = express();
-app.use(fileUpload());
+// app.use(fileUpload());
 const port = 5000; // You can choose any port
 require('dotenv').config();
 const formidable = require('formidable');
 
-const users_address = '0x5C78648C79795A19C83C5edFdc02757DB08deecE';
-const funding_address = '0x9faE77Ec40d91fCB04715fFd48a872218f716C25';
+const users_address = '0x5C78648C79795A19C83C5edFdc02757DB08deecE'; // change this to your deployed contract address
+const funding_address = '0xEfC0C53471217D18828884116255e5A42861c95e'; // change this to your deployed contract address
 const { apillonStorageAPI } = require('./apillon-api');
 const bucketUUID = process.env.BUCKET_UUID;
 
@@ -148,25 +148,64 @@ app.listen(port, () => {
   console.log(`Server is running on port number ${port}`);
 });
 
-// Add this new endpoint after your other API endpoints
+// app.get('/campaigns', async (req, res) => {
+//   try {
+//     const fundingContract = await get_funding_contract();
+//     const campaignCount = await fundingContract.getCampaignCount();
+//     const count = Number(campaignCount.toString());  // Convert BigInt to Number
+
+//     let campaigns = [];
+//     for (let i = 0; i < count; i++) {
+//       const campaign = await fundingContract.getCampaignInfo(i);
+
+//       // Debugging each campaign data
+//       console.log(`Campaign ${i}:`, campaign);
+
+//       // Ensure all elements are defined
+//       if(campaign[3] !== undefined && campaign[4] !== undefined) {
+//         campaigns.push({
+//           title: campaign[0],
+//           description: campaign[1],
+//           owner: campaign[2],
+//           goal: ethers.utils.formatEther(campaign[3]),
+//           raised: ethers.utils.formatEther(campaign[4]),
+//           active: campaign[5],
+//           contributors: campaign[6].length // Assuming campaign[6] is an array of addresses
+//         });
+//       }
+//     }
+
+//     res.status(200).json(campaigns);
+//   } catch (err) {
+//     console.error('Error fetching campaigns:', err);
+//     res.status(500).send('Error fetching campaigns.');
+//   }
+// });
 
 app.get('/campaigns', async (req, res) => {
   try {
     const fundingContract = await get_funding_contract();
-    const campaignCount = await fundingContract.campaigns.length;
+    const campaignCount = await fundingContract.getCampaignCount();
+    const count = Number(campaignCount.toString());  // Convert BigInt to Number
 
-    // Retrieve information for each campaign
     let campaigns = [];
-    for (let i = 0; i < campaignCount; i++) {
+    for (let i = 0; i < count; i++) {
       const campaign = await fundingContract.getCampaignInfo(i);
+
+      console.log(`Campaign ${i}:`, campaign);
+
+      // Convert BigInt to a string to be compatible with formatEther
+      const goalEther = ethers.formatEther(campaign[3].toString());
+      const raisedEther = ethers.formatEther(campaign[4].toString());
+
       campaigns.push({
         title: campaign[0],
         description: campaign[1],
         owner: campaign[2],
-        goal: ethers.utils.formatEther(campaign[3]), // Convert to ETH
-        raised: ethers.utils.formatEther(campaign[4]), // Convert to ETH
+        goal: goalEther,
+        raised: raisedEther,
         active: campaign[5],
-        contributors: campaign[6],
+        contributors: campaign[6].length // Assuming campaign[6] is an array of addresses
       });
     }
 
