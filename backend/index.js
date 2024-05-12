@@ -49,7 +49,7 @@ app.post('/profile', async (req, res) => {
   }
   const contract = await get_user_contract();
   const user = await contract.getUser(address);
-  console.log(user);
+  console.log("User: ", user);
   res.send(user);
 });
 
@@ -207,5 +207,18 @@ app.post('/contribute', async (req, res) => {
   } catch (error) {
     console.error('Error contributing to campaign:', error);
     res.status(500).send('Error contributing to campaign');
+  }
+});
+
+app.post('/toggle-campaign', async (req, res) => {
+  const { campaignId } = req.body;
+  try {
+      const fundingContract = await get_funding_contract();
+      const tx = await fundingContract.toggleCampaignActive(campaignId);
+      await tx.wait();
+      res.send({ success: true, message: 'Campaign status toggled successfully.' });
+  } catch (error) {
+      console.error('Error toggling campaign status:', error);
+      res.status(500).send('Error toggling campaign status');
   }
 });
