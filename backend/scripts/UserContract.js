@@ -12,6 +12,9 @@ function get_user_contract () {
   contract.addListener('UserCreated', (eventArgs) => {
       console.log(eventArgs);
   });
+  contract.addListener('UserUpdated', (eventArgs) => {
+    console.log(eventArgs);
+});
   return contract;
 }
 
