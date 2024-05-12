@@ -35,7 +35,7 @@ useEffect(() => {
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         const signer = provider.getSigner();
         const userProfileContract = new ethers.Contract(
-            '0x5C78648C79795A19C83C5edFdc02757DB08deecE',
+            '0x2654Ef0E4169210F6AD0392d2312206a23f0bc6a',
             userProfile.abi,
             signer
         );
@@ -80,8 +80,9 @@ useEffect(() => {
         'content-type': 'multipart/form-data',
       },
     };
+    console.log(formData.get('nume'));
 
-    const response = await contract.updateUser(account, event.target.nume, event.target.email);
+    const response = await contract.updateUser(account, formData.get('nume'), formData.get('email'));
   };
 
   return (
