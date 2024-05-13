@@ -2,25 +2,17 @@ const express = require('express');
 const fileUpload = require('express-fileupload');
 const {ethers} = require('hardhat');
 const axios = require('axios');
+const UserProfile = require('./artifacts/contracts/UserProfile.sol/UserProfile.json');
 
 const app = express();
 app.use(fileUpload());
 const port = 5000; // You can choose any port
 require('dotenv').config();
 
-const users_address = '0x33f4dA505F1274055F4A137C870949CB3C995Ac9'; // change this to your deployed contract address
-const funding_address = '0xF3a650D95413d91e9F49DA25Fae1EB0Dd80a5531'; // change this to your deployed contract address
 const { apillonStorageAPI } = require('./apillon-api');
 const { user_contract } = require('./scripts/UserContract');
+const { funding_contract} = require('./scripts/Funding');
 const bucketUUID = process.env.BUCKET_UUID;
-
-async function get_funding_contract() {
-  const MyContract = await ethers.getContractFactory("Funding");
-  const contract = MyContract.attach(
-    funding_address
-  );
-  return contract;
-}
 
 app.use(express.json());
 
@@ -38,7 +30,7 @@ app.post('/profile', async (req, res) => {
     res.send({name: '', email: ''});
     return;
   }
-  const user = await contract.getUser(address);
+  const user = await user_contract.getUser(address);
   console.log("User: ", user);
   res.send(user);
 });
@@ -102,11 +94,8 @@ app.post('/create-campaign', async (req, res) => {
   const goalInWei = ethers.parseEther(goal);
 
   try {
-    // Get the Funding contract instance
-    const fundingContract = await get_funding_contract();
-    
     // Interact with the smart contract to create a new campaign
-    const tx = await fundingContract.createCampaign(
+    const tx = await funding_contract.createCampaign(
       title,
       description,
       goalInWei,
@@ -133,13 +122,12 @@ app.listen(port, () => {
 app.get('/campaigns', async (req, res) => {
 
   try {
-    const fundingContract = await get_funding_contract();
-    const campaignCount = await fundingContract.getCampaignCount();
+    const campaignCount = await funding_contract.getCampaignCount();
     const count = Number(campaignCount.toString());
 
     let campaigns = [];
     for (let i = 0; i < count; i++) {
-      const campaign = await fundingContract.getCampaignInfo(i);
+      const campaign = await funding_contract.getCampaignInfo(i);
 
       const goalEther = ethers.formatEther(campaign[3].toString());
       const raisedEther = ethers.formatEther(campaign[4].toString());
@@ -178,8 +166,7 @@ app.post('/contribute', async (req, res) => {
   const { amount, campaignId } = req.body;
 
   try {
-    const fundingContract = await get_funding_contract();
-    const tx = await fundingContract.contribute(campaignId, { value: ethers.parseEther(amount) });
+    const tx = await funding_contract.contribute(campaignId, { value: ethers.parseEther(amount) });
     await tx.wait();
 
     res.status(200).send('Contribution successful!');
@@ -192,8 +179,7 @@ app.post('/contribute', async (req, res) => {
 app.post('/toggle-campaign', async (req, res) => {
   const { campaignId } = req.body;
   try {
-      const fundingContract = await get_funding_contract();
-      const tx = await fundingContract.toggleCampaignActive(campaignId);
+      const tx = await funding_contract.toggleCampaignActive(campaignId);
       await tx.wait();
       res.send({ success: true, message: 'Campaign status toggled successfully.' });
   } catch (error) {
