@@ -31,9 +31,18 @@ app.post('/profile', async (req, res) => {
     res.send({name: '', email: ''});
     return;
   }
-  const user = await user_contract.getUser(address);
-  console.log("User: ", user);
-  res.send(user);
+  
+  const estimatedGas = await user_contract.getUser.estimateGas(address);
+  const { gasPrice } = await (ethers.getDefaultProvider()).getFeeData();
+  const ethPrice = ethers.formatEther(gasPrice * estimatedGas);
+
+  if (ethPrice < 0.001) {
+    const user = await user_contract.getUser(address);
+    console.log("User: ", user);
+    res.send(user);
+  } else {
+    res.send(['Error: Fetching data is too expensive', '', '', '']);
+  }
 });
 
 app.get('/userProfile', async (req, res) => {

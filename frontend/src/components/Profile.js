@@ -9,6 +9,7 @@ const [data, setData] = useState([]);
 const [contract, setContract] = useState(null);
 const [account, setAccount] = useState(null);
 const [userProfile, setUserProfile] = useState(null);
+const [error, setError] = useState(null);
 
 
 useEffect(() => {
@@ -27,7 +28,11 @@ useEffect(() => {
       }), 
     })
       .then((response) => response.json())
-      .then((data) => setData(data))
+      .then((data) => {
+        if(data != undefined && data[0] != undefined && data[0].indexOf('Error') != -1)
+          setError(data[0])
+        else setData(data)
+      })
   }, [account]);
 
 useEffect(() => {
@@ -99,6 +104,10 @@ useEffect(() => {
           Name:
           <input type="text" name="nume" defaultValue={data[2]}/>
         </label>
+        <br />
+        <p style={{ color: 'red', fontWeight: 'bold' }}>
+          {error}
+        </p>
         <br />
         <button type="submit">Create Project</button>
       </form>
