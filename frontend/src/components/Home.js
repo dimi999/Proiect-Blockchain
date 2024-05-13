@@ -41,7 +41,7 @@ function Home() {
           const provider = new ethers.providers.Web3Provider(window.ethereum);
           const signer = provider.getSigner();
           const fundingContract = new ethers.Contract(
-              '0x3732fAf3c1a65fB858012297BAea953E465ED413',
+              '0xF3a650D95413d91e9F49DA25Fae1EB0Dd80a5531',
               funding.abi,
               signer
           );

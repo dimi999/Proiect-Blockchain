@@ -10,8 +10,8 @@ const port = 5000; // You can choose any port
 require('dotenv').config();
 const formidable = require('formidable');
 
-const users_address = '0x5C78648C79795A19C83C5edFdc02757DB08deecE'; // change this to your deployed contract address
-const funding_address = '0x3732fAf3c1a65fB858012297BAea953E465ED413'; // change this to your deployed contract address
+const users_address = '0x33f4dA505F1274055F4A137C870949CB3C995Ac9'; // change this to your deployed contract address
+const funding_address = '0xF3a650D95413d91e9F49DA25Fae1EB0Dd80a5531'; // change this to your deployed contract address
 const { apillonStorageAPI } = require('./apillon-api');
 const bucketUUID = process.env.BUCKET_UUID;
 
@@ -47,6 +47,7 @@ app.post('/profile', async (req, res) => {
     res.send({name: '', email: ''});
     return;
   }
+  console.log(address);
   const contract = await get_user_contract();
   const user = await contract.getUser(address);
   console.log("User: ", user);

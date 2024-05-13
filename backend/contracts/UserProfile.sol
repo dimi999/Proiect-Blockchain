@@ -34,7 +34,7 @@ contract UserProfile {
     }
 
     function getUser(address userAddress) external view returns (User memory) {
-        require(bytes(users[userAddress].name).length != 0, "User does not exist");
+        require(bytes(users[userAddress].status).length != 0, "User does not exist");
         return users[userAddress];
     }
 }
