@@ -8,8 +8,8 @@ app.use(fileUpload());
 const port = 5000; // You can choose any port
 require('dotenv').config();
 
-
-const funding_address = '0x126793D0c82554740F30655A1475deE0a63c0775';
+const users_address = '0x33f4dA505F1274055F4A137C870949CB3C995Ac9'; // change this to your deployed contract address
+const funding_address = '0xF3a650D95413d91e9F49DA25Fae1EB0Dd80a5531'; // change this to your deployed contract address
 const { apillonStorageAPI } = require('./apillon-api');
 const { user_contract } = require('./scripts/UserContract');
 const bucketUUID = process.env.BUCKET_UUID;
@@ -38,8 +38,8 @@ app.post('/profile', async (req, res) => {
     res.send({name: '', email: ''});
     return;
   }
-  const user = await user_contract.getUser(address);
-  console.log(user);
+  const user = await contract.getUser(address);
+  console.log("User: ", user);
   res.send(user);
 });
 
@@ -68,6 +68,7 @@ app.post('/upload', async (req, res) => {
   // Step 2: Upload each file to Apillon using the PUT method
   for (let x of responses) {
     const uploadUrl = x.url;
+    fileUuid = x.fileUuid;
 
     try {
       // Upload directly using the file buffer with the correct content type
@@ -84,18 +85,18 @@ app.post('/upload', async (req, res) => {
   }
 
   // Step 3: Finalize the upload session
+
   try {
-    await apillonStorageAPI.post(`/buckets/${bucketUUID}/upload/${sessionUuid}/end`);
+    end_response = await apillonStorageAPI.post(`/buckets/${bucketUUID}/upload/${sessionUuid}/end`);
   } catch (err) {
     console.error("Error finalizing Apillon session:", err);
     return res.status(500).send("Error finalizing Apillon session.");
   }
-
-  res.send('File uploaded successfully.');
+  res.status(200).send(fileUuid);
 });
 
 app.post('/create-campaign', async (req, res) => {
-  const { title, description, goal, address, ipfsUrl } = req.body;
+  const { title, description, goal, address, fileUuid } = req.body;
 
   // Goal should be in wei, so convert it to a proper format
   const goalInWei = ethers.parseEther(goal);
@@ -107,8 +108,9 @@ app.post('/create-campaign', async (req, res) => {
     // Interact with the smart contract to create a new campaign
     const tx = await fundingContract.createCampaign(
       title,
-      `${description} (Image: ${ipfsUrl})`,
+      description,
       goalInWei,
+      fileUuid,
       { from: address }
     );
 
@@ -127,25 +129,41 @@ app.listen(port, () => {
   console.log(`Server is running on port number ${port}`);
 });
 
-// Add this new endpoint after your other API endpoints
 
 app.get('/campaigns', async (req, res) => {
+
   try {
     const fundingContract = await get_funding_contract();
-    const campaignCount = await fundingContract.campaigns.length;
+    const campaignCount = await fundingContract.getCampaignCount();
+    const count = Number(campaignCount.toString());
 
-    // Retrieve information for each campaign
     let campaigns = [];
-    for (let i = 0; i < campaignCount; i++) {
+    for (let i = 0; i < count; i++) {
       const campaign = await fundingContract.getCampaignInfo(i);
+
+      const goalEther = ethers.formatEther(campaign[3].toString());
+      const raisedEther = ethers.formatEther(campaign[4].toString());
+
+      const fileUuid = campaign[8];
+      let ipfsUrl = '';
+      const response = await apillonStorageAPI.get(`/buckets/${bucketUUID}/files/${fileUuid}`);
+      if (response.data.data.link == null) {
+        ipfsUrl = 'https://cdn.pixabay.com/photo/2024/04/25/06/50/banana-8719086_1280.jpg';
+      }
+      else {
+        ipfsUrl = response.data.data.link;
+      }
+
       campaigns.push({
+        id: i,
         title: campaign[0],
         description: campaign[1],
         owner: campaign[2],
-        goal: ethers.utils.formatEther(campaign[3]), // Convert to ETH
-        raised: ethers.utils.formatEther(campaign[4]), // Convert to ETH
+        goal: goalEther,
+        raised: raisedEther,
         active: campaign[5],
-        contributors: campaign[6],
+        contributors: campaign[6].length, // Assuming campaign[6] is an array of addresses
+        ipfsUrl: ipfsUrl,
       });
     }
 
@@ -153,5 +171,33 @@ app.get('/campaigns', async (req, res) => {
   } catch (err) {
     console.error('Error fetching campaigns:', err);
     res.status(500).send('Error fetching campaigns.');
+  }
+});
+
+app.post('/contribute', async (req, res) => {
+  const { amount, campaignId } = req.body;
+
+  try {
+    const fundingContract = await get_funding_contract();
+    const tx = await fundingContract.contribute(campaignId, { value: ethers.parseEther(amount) });
+    await tx.wait();
+
+    res.status(200).send('Contribution successful!');
+  } catch (error) {
+    console.error('Error contributing to campaign:', error);
+    res.status(500).send('Error contributing to campaign');
+  }
+});
+
+app.post('/toggle-campaign', async (req, res) => {
+  const { campaignId } = req.body;
+  try {
+      const fundingContract = await get_funding_contract();
+      const tx = await fundingContract.toggleCampaignActive(campaignId);
+      await tx.wait();
+      res.send({ success: true, message: 'Campaign status toggled successfully.' });
+  } catch (error) {
+      console.error('Error toggling campaign status:', error);
+      res.status(500).send('Error toggling campaign status');
   }
 });

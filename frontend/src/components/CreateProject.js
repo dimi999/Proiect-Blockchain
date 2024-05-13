@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 function CreateProject() {
@@ -7,8 +7,23 @@ function CreateProject() {
   const [goal, setGoal] = useState('');
   const [file, setFile] = useState(null);
   const [userAddress, setUserAddress] = useState(''); // Example user address (could be provided dynamically)
-  const [data, setData] = useState([]);
+  const [campaigns, setCampaigns] = useState([]);
 
+  // Fetch the campaign data from the backend
+  const fetchCampaigns = async () => {
+    try {
+      const response = await axios.get('/campaigns');
+      setCampaigns(response.data);
+      console.log('Campaigns:', response.data);
+    } catch (error) {
+      console.error('Error fetching campaigns:', error);
+    }
+  };
+
+  // Fetch campaigns when the component mounts
+  useEffect(() => {
+    fetchCampaigns();
+  }, []);
 
   const handleFileChange = (event) => {
     setFile(event.target.files[0]);
@@ -18,7 +33,7 @@ function CreateProject() {
     event.preventDefault();
     const formData = new FormData();
     formData.append('file', file);
-    let ipfsUrl = '';
+    let fileUuid = '';
 
     const config = {
       headers: {
@@ -27,19 +42,21 @@ function CreateProject() {
     };
     try {
       const response = await axios.post('/upload', formData, config);
-      ipfsUrl = response.data; // Adjust based on the response structure
+      fileUuid = response.data; // Adjust based on the response structure
     } catch (error) {
       console.error('Error uploading image to IPFS:', error);
       return;
     }
 
-     // Prepare campaign data to submit
-     const campaignData = {
+    console.log('File UUID:', fileUuid)
+
+    // Prepare campaign data to submit
+    const campaignData = {
       title,
       description,
       goal,
       address: userAddress,
-      ipfsUrl,
+      fileUuid,
     };
 
     // Call the backend to create the campaign
@@ -49,6 +66,11 @@ function CreateProject() {
     } catch (error) {
       console.error('Error creating campaign:', error);
     }
+
+    // Refresh campaign data
+    fetchCampaigns();
+
+    console.log('Campaigns:', campaigns);
   };
 
   return (
@@ -76,7 +98,20 @@ function CreateProject() {
         <input type="file" className="form-control" id="customFile" onChange={handleFileChange} />
         <button type="submit">Create Project</button>
       </form>
-      <div>{data}</div>
+      
+      {/* <h2>Existing Campaigns</h2>
+      <div>
+        {campaigns.map((campaign, index) => (
+          <div key={index} className="card">
+            <h3>{campaign.title}</h3>
+            <p>{campaign.description}</p>
+            <p><strong>Owner:</strong> {campaign.owner}</p>
+            <p><strong>Goal:</strong> {campaign.goal} ETH</p>
+            <p><strong>Raised:</strong> {campaign.raised} ETH</p>
+            <p><strong>Active:</strong> {campaign.active ? 'Yes' : 'No'}</p>
+          </div>
+        ))}
+      </div> */}
     </div>
   );
 }

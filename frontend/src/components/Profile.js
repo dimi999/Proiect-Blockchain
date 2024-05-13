@@ -35,7 +35,7 @@ useEffect(() => {
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         const signer = provider.getSigner();
         const userProfileContract = new ethers.Contract(
-            '0x2654Ef0E4169210F6AD0392d2312206a23f0bc6a',
+            '0x33f4dA505F1274055F4A137C870949CB3C995Ac9',
             userProfile.abi,
             signer
         );
