@@ -112,6 +112,17 @@ contract Funding {
         );
     }
 
+    function toggleCampaignActive(uint256 campaignId) external {
+        FundingCampaign storage campaign = campaigns[campaignId];
+        require(msg.sender == campaign.owner, "Only the campaign owner can toggle the state");
+        
+        campaign.active = !campaign.active; // Toggle the active state
+
+        emit CampaignStatusChanged(campaignId, campaign.active);
+    }
+
+    event CampaignStatusChanged(uint256 indexed campaignId, bool newStatus);
+
     // function getContribution(uint256 campaignId, address contributor) external view returns (uint256) {
     //     require(campaignId < campaigns.length, "Invalid campaign ID");
     //     FundingCampaign storage campaign = campaigns[campaignId];

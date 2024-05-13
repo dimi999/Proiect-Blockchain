@@ -24,30 +24,23 @@ function Home() {
   }, []);
 
   useEffect(() => {
-    console.log(account);
-      fetch('/profile', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          "address" : account,
-        }), 
-      })
-        .then((response) => response.json())
-        .then((data) => setData(data))
-    }, [account]);
+    fetch('/funding')
+      .then((response) => response.json())
+      .then((data) => setFunding(data))
+  }, []);
 
   useEffect(() => {
       const getContract = async () => {
           const provider = new ethers.providers.Web3Provider(window.ethereum);
           const signer = provider.getSigner();
           const fundingContract = new ethers.Contract(
-              '0xF3a650D95413d91e9F49DA25Fae1EB0Dd80a5531',
+              '0xC2d068F40290d525afcDbF0Fb3c902aC5f747531',
               funding.abi,
               signer
           );
           setContract(fundingContract);
       }
-      
+      console.log("funding: " + funding);
       if (funding) {
           getContract();
       }
@@ -63,6 +56,11 @@ function Home() {
                   const provider = new ethers.providers.Web3Provider(window.ethereum);
                   const signer = provider.getSigner();
                   const currentAccount = await signer.getAddress();
+
+                  console.log("provider: " + provider);
+                  console.log("signer: " + signer);
+                  console.log("currentAccount: " + currentAccount);
+
                   setAccount(currentAccount);
                 } catch (error) {
                   console.error(error);
@@ -71,7 +69,7 @@ function Home() {
               console.error("MetaMask extension not detected. Please install MetaMask.");
           }
       }
-      
+      console.log("contract: " + contract);
       if(contract) {
           init();
       }
@@ -100,8 +98,8 @@ function Home() {
 
   const handleToggleActive = async (campaignId) => {
     try {
-      const response = await axios.post('/toggle-campaign', { campaignId });
-      console.log('Toggle success:', response.data.message);
+      const tx = await contract.toggleCampaignActive(campaignId);
+      console.log('Toggle success:', tx.data.message);
       // Fetch the updated list of campaigns
       const updatedCampaigns = await axios.get('/campaigns');
       setCampaigns(updatedCampaigns.data);
@@ -109,11 +107,11 @@ function Home() {
       console.error('Error toggling campaign status:', error);
     }
   };
-  console.log("Current account: " + account);
-  for (let x of campaigns) {
-    console.log("Owner: " + x.owner);
-    console.log("Goal: " + x.goal);
-  }
+  // console.log("Current account: " + account);
+  // for (let x of campaigns) {
+  //   console.log("Owner: " + x.owner);
+  //   console.log("Goal: " + x.goal);
+  // }
 
 
 
@@ -124,7 +122,7 @@ function Home() {
       <h2>Active Campaigns</h2>
       <div>
         {campaigns.map((campaign, index) => (
-          <div key={index} className="card">
+          <div key={index} className="card" style={{padding: '50px 10px'}}>
             <img src={campaign.ipfsUrl} style={{ width: '100px' }} alt="Campaign" />
             <h3>{campaign.title}</h3>
             <p>{campaign.description}</p>
@@ -133,13 +131,23 @@ function Home() {
             <p><strong>Raised:</strong> {campaign.raised} ETH</p>
             <p><strong>Active:</strong> {campaign.active ? 'Yes' : 'No'}</p>
             {account === campaign.owner &&
-                <button onClick={() => handleToggleActive(campaign.id)}>Toggle Active</button>
+                <button className="btn btn-primary"
+                  onClick={() => handleToggleActive(campaign.id)}
+                  style={{ width: '200px', padding: '10px 20px' }}
+                >
+                  Toggle Active
+                </button>
             }
-            <form onSubmit={handleSubmit}>
-              <input type="decimal" name="amount" placeholder="Amount in ETH" />
-              <input type="hidden" name="id" value={campaign.id} />  
-              <button type="submit">Contribute</button>
-            </form>
+            
+            {campaign.active &&
+              <form onSubmit={handleSubmit}>
+                <input className='form-control' style={{ width: '200px', margin: '10px 0px 0px 0px' }}
+                type="decimal" name="amount" placeholder="Amount in ETH" />
+                <input type="hidden" name="id" value={campaign.id} /> 
+                <br /> 
+                <button className='btn btn-success' type="submit">Contribute</button>
+              </form>
+            }
           </div>
         ))}
       </div>

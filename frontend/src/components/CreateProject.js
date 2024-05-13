@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { ethers } from 'ethers';
 
 function CreateProject() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [goal, setGoal] = useState('');
   const [file, setFile] = useState(null);
-  const [userAddress, setUserAddress] = useState(''); // Example user address (could be provided dynamically)
   const [campaigns, setCampaigns] = useState([]);
+  const [funding, setFunding] = useState(null);
+  const [contract, setContract] = useState(null);
+  const [account, setAccount] = useState(null);
 
   // Fetch the campaign data from the backend
   const fetchCampaigns = async () => {
@@ -24,6 +27,59 @@ function CreateProject() {
   useEffect(() => {
     fetchCampaigns();
   }, []);
+
+  useEffect(() => {
+    fetch('/funding')
+      .then((response) => response.json())
+      .then((data) => setFunding(data))
+  }, []);
+
+  useEffect(() => {
+      const getContract = async () => {
+          const provider = new ethers.providers.Web3Provider(window.ethereum);
+          const signer = provider.getSigner();
+          const fundingContract = new ethers.Contract(
+              '0xC2d068F40290d525afcDbF0Fb3c902aC5f747531',
+              funding.abi,
+              signer
+          );
+          setContract(fundingContract);
+      }
+      console.log("funding: " + funding);
+      if (funding) {
+          getContract();
+      }
+  }
+  , [funding])
+
+  useEffect(() => {
+      const init = async () => {
+          if (window.ethereum) {
+              try {
+                  await window.ethereum.request({ method: 'eth_requestAccounts' });
+
+                  const provider = new ethers.providers.Web3Provider(window.ethereum);
+                  const signer = provider.getSigner();
+                  const currentAccount = await signer.getAddress();
+
+                  console.log("provider: " + provider);
+                  console.log("signer: " + signer);
+                  console.log("currentAccount: " + currentAccount);
+
+                  setAccount(currentAccount);
+                } catch (error) {
+                  console.error(error);
+              }
+          } else {
+              console.error("MetaMask extension not detected. Please install MetaMask.");
+          }
+      }
+      console.log("contract: " + contract);
+      if(contract) {
+          init();
+      }
+          
+    }, [contract]);
 
   const handleFileChange = (event) => {
     setFile(event.target.files[0]);
@@ -47,22 +103,16 @@ function CreateProject() {
       console.error('Error uploading image to IPFS:', error);
       return;
     }
-
-    console.log('File UUID:', fileUuid)
-
-    // Prepare campaign data to submit
-    const campaignData = {
-      title,
-      description,
-      goal,
-      address: userAddress,
-      fileUuid,
-    };
-
+    var goalInWei = ethers.utils.parseEther(goal);
     // Call the backend to create the campaign
     try {
-      const response = await axios.post('/create-campaign', campaignData);
-      console.log(response.data); // Success message
+      const tx = await contract.createCampaign(
+        title,
+        description,
+        goalInWei,
+        fileUuid
+      );
+      
     } catch (error) {
       console.error('Error creating campaign:', error);
     }

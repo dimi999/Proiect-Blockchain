@@ -3,6 +3,7 @@ const fileUpload = require('express-fileupload');
 const {ethers} = require('hardhat');
 const axios = require('axios');
 const UserProfile = require('./artifacts/contracts/UserProfile.sol/UserProfile.json');
+const Funding = require('./artifacts/contracts/Funding.sol/Funding.json');
 
 const app = express();
 app.use(fileUpload());
@@ -37,6 +38,10 @@ app.post('/profile', async (req, res) => {
 
 app.get('/userProfile', async (req, res) => {
   res.send(UserProfile);
+});
+
+app.get('/funding', async (req, res) => {
+  res.send(Funding);
 });
 
 app.post('/upload', async (req, res) => {
@@ -87,32 +92,6 @@ app.post('/upload', async (req, res) => {
   res.status(200).send(fileUuid);
 });
 
-app.post('/create-campaign', async (req, res) => {
-  const { title, description, goal, address, fileUuid } = req.body;
-
-  // Goal should be in wei, so convert it to a proper format
-  const goalInWei = ethers.parseEther(goal);
-
-  try {
-    // Interact with the smart contract to create a new campaign
-    const tx = await funding_contract.createCampaign(
-      title,
-      description,
-      goalInWei,
-      fileUuid,
-      { from: address }
-    );
-
-    // Wait for the transaction to be mined
-    await tx.wait();
-
-    res.status(200).send('Campaign successfully created!');
-    console.log('Campaign successfully created!');
-  } catch (error) {
-    console.error('Error creating campaign:', error);
-    res.status(500).send('Error creating campaign');
-  }
-});
 
 app.listen(port, () => {
   console.log(`Server is running on port number ${port}`);
