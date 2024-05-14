@@ -12,13 +12,26 @@ require('dotenv').config();
 
 const { apillonStorageAPI } = require('./apillon-api');
 const { user_contract } = require('./scripts/UserContract');
-const { funding_contract} = require('./scripts/Funding');
+const { funding_contract } = require('./scripts/Funding');
+const { reputation_contract } = require('./scripts/Reputation');
+
 const bucketUUID = process.env.BUCKET_UUID;
+BigInt.prototype.toJSON = function() { return this.toString() }
+let lastContribution = []
+funding_contract.addListener("ContributionMade", (_, address, value) => {
+    console.log('ceva');
+    lastContribution = [address, value];
+});
+
 
 app.use(express.json());
 
 app.get('/', (req, res) => {
   res.send('Hello from the Node.js backend!');
+});
+
+app.get('/lastContribution', (req, res) => {
+  res.send(lastContribution);
 });
 
 app.get('/home', (req, res) => {
@@ -31,9 +44,18 @@ app.post('/profile', async (req, res) => {
     res.send({name: '', email: ''});
     return;
   }
-  const user = await user_contract.getUser(address);
-  console.log("User: ", user);
-  res.send(user);
+  
+  const estimatedGas = await user_contract.getUser.estimateGas(address);
+  const { gasPrice } = await (ethers.getDefaultProvider()).getFeeData();
+  const ethPrice = ethers.formatEther(gasPrice * estimatedGas);
+
+  if (ethPrice < 0.001) {
+    const user = await user_contract.getUser(address);
+    console.log("User: ", user);
+    res.send(user);
+  } else {
+    res.send(['Error: Fetching data is too expensive', '', '', '']);
+  }
 });
 
 app.get('/userProfile', async (req, res) => {
@@ -92,12 +114,6 @@ app.post('/upload', async (req, res) => {
   res.status(200).send(fileUuid);
 });
 
-
-app.listen(port, () => {
-  console.log(`Server is running on port number ${port}`);
-});
-
-
 app.get('/campaigns', async (req, res) => {
 
   try {
@@ -142,11 +158,16 @@ app.get('/campaigns', async (req, res) => {
 });
 
 app.post('/contribute', async (req, res) => {
-  const { amount, campaignId } = req.body;
+  const { amount, campaignId, account } = req.body;
+  console.log(amount, campaignId, account);
 
   try {
     const tx = await funding_contract.contribute(campaignId, { value: ethers.parseEther(amount) });
     await tx.wait();
+
+    const tx2 = await reputation_contract.mint(account, amount * 1e3);
+    await tx2.wait();
+    console.log(await reputation_contract.balanceOf(account));
 
     res.status(200).send('Contribution successful!');
   } catch (error) {
@@ -165,4 +186,8 @@ app.post('/toggle-campaign', async (req, res) => {
       console.error('Error toggling campaign status:', error);
       res.status(500).send('Error toggling campaign status');
   }
+});
+
+app.listen(port, () => {
+  console.log(`Server is running on port number ${port}`);
 });

@@ -7,7 +7,18 @@ function Home() {
   const [contract, setContract] = useState(null);
   const [account, setAccount] = useState(null);
   const [funding, setFunding] = useState(null);
-  const [data, setData] = useState([]);
+  const [lastContribution, setLastContribution] = useState([]);
+
+  useEffect(() => {
+    fetch('/lastContribution')
+      .then((response) => response.json())
+      .then((data) => {
+        if(data != [])
+          setLastContribution(data);
+        else 
+          setLastContribution(['', '']);
+      })
+  }, []);
 
   useEffect(() => {
     const fetchCampaigns = async () => {
@@ -89,6 +100,7 @@ function Home() {
       const response = await axios.post('/contribute', {
         amount,
         campaignId,
+        account
       });
       console.log(response.data);
     } catch (error) {
@@ -118,6 +130,9 @@ function Home() {
   return (
     <div>
       <h1>Welcome to the Crowdfunding App</h1>
+      <p>Last contribution made from <br/> 
+        user: {lastContribution[0]}, <br/>
+        value: {lastContribution[1]} wei</p>
       <p>This is the home page of our crowdfunding app.</p>
       <h2>Active Campaigns</h2>
       <div>

@@ -9,6 +9,7 @@ function get_funding_contract () {
   const signer = new ethers.Wallet(process.env.PRIVATE_KEY);
   let signer2 = signer.connect(ethers.provider);
   let contract = new ethers.Contract(funding_address, Funding.abi, signer2);
+
   return contract;
 }
 

@@ -1,4 +1,3 @@
-const { ethers } = require('hardhat');
 const { expect } = require("chai");
 const { user_contract } = require('../scripts/UserContract');
 
@@ -23,10 +22,11 @@ describe("UserActions", () => {
   });
 
   it("should update user personal data and emit event", async () => {
-    await user_contract.updateUser("0x97969a099f209098bd970F4E15ed1A783a488B27", "ceva@email.com", "ceva");
+    const tx = await user_contract.updateUser("0x97969a099f209098bd970F4E15ed1A783a488B27", "ceva@email.com", "ceva");
+    await tx.wait();
     const user = await user_contract.getUser("0x97969a099f209098bd970F4E15ed1A783a488B27");
     expect(user[2]).to.eq('ceva@email.com');
-  });
+  }, 20000);
 });
 
 describe("UserEvents", () => {
