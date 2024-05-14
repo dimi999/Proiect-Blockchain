@@ -4,6 +4,7 @@
 require("@nomicfoundation/hardhat-ignition-ethers");
 require("@nomicfoundation/hardhat-ethers");
 require("@nomicfoundation/hardhat-chai-matchers")
+require('@openzeppelin/hardhat-upgrades');
 require('dotenv').config()
 module.exports = {
   networks: {
@@ -17,6 +18,9 @@ module.exports = {
       url: "https://sepolia.infura.io/v3/9a5a23759f5e4e76ada3a165099a792d",
       accounts: [process.env.PRIVATE_KEY]
     }
+  },
+  etherscan: {
+    apiKey: process.env.SEPOLIA_KEY
   },
   defaultNetwork: "sepolia",
   solidity: {

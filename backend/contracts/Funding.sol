@@ -3,7 +3,10 @@ pragma solidity ^0.8.0;
 
 import "./UserProfile.sol";
 
-contract Funding {
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+
+contract Funding is Initializable, OwnableUpgradeable {
 
     struct FundingCampaign {
         string title;
@@ -24,6 +27,10 @@ contract Funding {
     event CampaignClosed(uint256 indexed campaignId);
 
     event Debug(string message, uint256 value);
+
+    function initialize() public initializer {
+        __Ownable_init();
+    }
 
     function createCampaign(
         string calldata title,

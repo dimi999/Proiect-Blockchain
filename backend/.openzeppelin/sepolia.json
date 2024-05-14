@@ -1,0 +1,198 @@
+{
+  "manifestVersion": "3.2",
+  "proxies": [
+    {
+      "address": "0x5725D6754b12F37b7c6455d34704D1727A78C7ca",
+      "txHash": "0x2a2479aa6c34aa751b035319652ecf0d6d852a0d5f821fd69688311c5322dc82",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x8334E98bBB92e4c729305f265E25156E6412f46F",
+      "txHash": "0x94e4e2887bba8676b43915a7ea17ba47a3359d46d0c664a97a67ad337dc9dc21",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x3d3e057714a8c29d54daFa7Da7Ae166449B3115A",
+      "txHash": "0x634609e0351fb9227f4f36261b0cc1785f75566baa7da10669e8ef6f92bb6a21",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x9a4255cAE62b6d0BC4dFe0E29705aa3AB0985F6A",
+      "txHash": "0x3d54a1ecf424e982c245034ab5847c33371c077fe09d37d344a21ec927acbb25",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x62f447De4e7695EaeB7A4d5902707528c0a59c30",
+      "txHash": "0x3c105cd9c8b67947a0f08496362d1da0b701f96e88ac0b573c02789bf3984802",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x7189ce02622c20EdDb6579D32B558F537293C0Cd",
+      "txHash": "0x1ed0e25204f7a4aef733f1a101f235f6b38eb143d2133d1c39e4bbb131302b6a",
+      "kind": "transparent"
+    }
+  ],
+  "impls": {
+    "4fd276e1deeab2a15591f09b8c4fa29881d28ec359233f7dc5b4f30c712e1f18": {
+      "address": "0x4755b463a5eB21A7A3ABc5A80CE0E86aAf4D1A1A",
+      "txHash": "0x4955bd75078e6aa670c4f922d8094b89394f95cdaef640e739dcc0b037c4df06",
+      "layout": {
+        "solcVersion": "0.8.24",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:63",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:68"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\utils\\ContextUpgradeable.sol:40"
+          },
+          {
+            "label": "_owner",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_address",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\access\\OwnableUpgradeable.sol:22"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\access\\OwnableUpgradeable.sol:94"
+          },
+          {
+            "label": "campaigns",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_array(t_struct(FundingCampaign)1432_storage)dyn_storage",
+            "contract": "Funding",
+            "src": "contracts\\Funding.sol:23"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_address)dyn_storage": {
+            "label": "address[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_struct(FundingCampaign)1432_storage)dyn_storage": {
+            "label": "struct Funding.FundingCampaign[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_array(t_uint256)dyn_storage": {
+            "label": "uint256[]",
+            "numberOfBytes": "32"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_struct(FundingCampaign)1432_storage": {
+            "label": "struct Funding.FundingCampaign",
+            "members": [
+              {
+                "label": "title",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "description",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "goal",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "raised",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "active",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "5"
+              },
+              {
+                "label": "contributors",
+                "type": "t_array(t_address)dyn_storage",
+                "offset": 0,
+                "slot": "6"
+              },
+              {
+                "label": "contributions",
+                "type": "t_array(t_uint256)dyn_storage",
+                "offset": 0,
+                "slot": "7"
+              },
+              {
+                "label": "ipfsUuid",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "8"
+              }
+            ],
+            "numberOfBytes": "288"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        },
+        "namespaces": {}
+      }
+    }
+  }
+}

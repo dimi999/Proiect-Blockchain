@@ -39,7 +39,7 @@ function CreateProject() {
           const provider = new ethers.providers.Web3Provider(window.ethereum);
           const signer = provider.getSigner();
           const fundingContract = new ethers.Contract(
-              '0xC2d068F40290d525afcDbF0Fb3c902aC5f747531',
+              '0x7189ce02622c20EdDb6579D32B558F537293C0Cd',
               funding.abi,
               signer
           );
@@ -106,12 +106,19 @@ function CreateProject() {
     var goalInWei = ethers.utils.parseEther(goal);
     // Call the backend to create the campaign
     try {
+      console.log('Creating campaign:', title, description, goalInWei, fileUuid);
       const tx = await contract.createCampaign(
         title,
         description,
         goalInWei,
         fileUuid
       );
+      console.log('Transaction hash:', tx.hash);
+
+      // Wait for the transaction to be mined
+      await tx.wait();
+
+      console.log('Campaign created!');
       
     } catch (error) {
       console.error('Error creating campaign:', error);
