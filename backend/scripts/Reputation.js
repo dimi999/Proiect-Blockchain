@@ -2,7 +2,7 @@ const Reputation = require('../artifacts/contracts/Reputation.sol/ReputationToke
 const {ethers} = require('hardhat');
 require('dotenv').config()
 
-const reputation_address = '0x5f31CE2ebD968F55509b8c187Ec7376afcf427AE';
+const reputation_address = '0x27Af01B8cb11568B8d66Ac39cDf35feE7e4E4E79';
 const reputation_contract = get_reputation_contract();
 
 function get_reputation_contract () {

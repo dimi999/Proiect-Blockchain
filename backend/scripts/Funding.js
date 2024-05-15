@@ -2,7 +2,7 @@ const Funding = require('../artifacts/contracts/Funding.sol/Funding.json');
 const {ethers} = require('hardhat');
 require('dotenv').config()
 
-const funding_address = '0x7189ce02622c20EdDb6579D32B558F537293C0Cd'; // proxy address
+const funding_address = '0xA30Dc48595FF3c7a1FDE94DA24CF6AFd7ED0c9FF'; // proxy address
 const funding_contract = get_funding_contract();
 
 function get_funding_contract () {

@@ -1,12 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "./UserProfile.sol";
-
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
+interface I {
+    function incrementCount(address userAddress) external;
+}
+
 contract Funding is Initializable, OwnableUpgradeable {
+
+    I public itf = I(0x4344B34d4C380Af1d5cb2930578739a5834A9150);
 
     struct FundingCampaign {
         string title;
@@ -32,6 +36,12 @@ contract Funding is Initializable, OwnableUpgradeable {
         __Ownable_init();
     }
 
+    function getState(uint256 goal, uint256 raised) external pure returns (string memory) {
+        if (goal < raised)
+            return "Goal not reached yet";
+        else return "Goal reached";
+    }
+
     function createCampaign(
         string calldata title,
         string calldata description,
@@ -49,6 +59,8 @@ contract Funding is Initializable, OwnableUpgradeable {
         campaign.raised = 0;
         campaign.active = true;
         campaign.ipfsUuid = ipfsUuid;
+
+        itf.incrementCount(msg.sender);
 
         emit CampaignCreated(campaigns.length - 1, title, description, msg.sender, goal, ipfsUuid);
         emit Debug("Campaign created, new count", campaigns.length);

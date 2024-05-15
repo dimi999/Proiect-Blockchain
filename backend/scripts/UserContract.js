@@ -2,7 +2,7 @@ const UserProfile = require('../artifacts/contracts/UserProfile.sol/UserProfile.
 const {ethers} = require('hardhat');
 require('dotenv').config()
 
-const users_address = '0x9e2bfb435A4b76B8DfE731fA191fdF9cEDfA49cB';
+const users_address = '0x4344B34d4C380Af1d5cb2930578739a5834A9150';
 const user_contract = get_user_contract();
 
 function get_user_contract () {

@@ -2,11 +2,13 @@
 pragma solidity ^0.8.0;
 
 contract UserProfile {
+
     struct User {
         address userAddress;
         string status;
         string name;
         string email;
+        uint256 campaignCount;
     }
 
     mapping(address => User) public users;
@@ -20,10 +22,15 @@ contract UserProfile {
             userAddress: msg.sender,
             status: "Acount Created",
             name: "",
-            email: ""
+            email: "",
+            campaignCount: 0
         });
         emit UserCreated(msg.sender, "Acount Created");
         return users[msg.sender];
+    }
+
+    function incrementCount(address userAddress) external  {
+        users[userAddress].campaignCount += 1;
     }
 
     function updateUser(address userAddress, string calldata name, string calldata email) external {

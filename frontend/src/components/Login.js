@@ -18,7 +18,7 @@ function Login() {
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             const signer = provider.getSigner();
             const userProfileContract = new ethers.Contract(
-                '0x9e2bfb435A4b76B8DfE731fA191fdF9cEDfA49cB',
+                '0x4344B34d4C380Af1d5cb2930578739a5834A9150',
                 userProfile.abi,
                 signer
             );
