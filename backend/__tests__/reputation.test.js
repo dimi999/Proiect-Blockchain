@@ -58,7 +58,7 @@ describe("ReputationToken", (accounts) => {
     const newAdmin = user1;
     await reputationTokenInstance.changeAdmin(newAdmin);
     const updatedAdmin = await reputationTokenInstance.admin();
-    expect(updatedAdmin).to.eq(newAdmin);
+    expect(updatedAdmin).to.eq(await newAdmin.getAddress());
   });
 
 //   it("should emit AdminChanged event when admin address is changed", async () => {
