@@ -10,7 +10,7 @@ interface I {
 
 contract Funding is Initializable, OwnableUpgradeable {
 
-    I public itf = I(0x4344B34d4C380Af1d5cb2930578739a5834A9150);
+    I public itf;
 
     struct FundingCampaign {
         string title;
@@ -34,10 +34,11 @@ contract Funding is Initializable, OwnableUpgradeable {
 
     function initialize() public initializer {
         __Ownable_init();
+        itf = I(0x4344B34d4C380Af1d5cb2930578739a5834A9150);
     }
 
     function getState(uint256 goal, uint256 raised) external pure returns (string memory) {
-        if (goal < raised)
+        if (goal > raised)
             return "Goal not reached yet";
         else return "Goal reached";
     }

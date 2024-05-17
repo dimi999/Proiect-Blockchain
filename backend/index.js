@@ -127,9 +127,12 @@ app.get('/campaigns', async (req, res) => {
       const goalEther = ethers.formatEther(campaign[3].toString());
       const raisedEther = ethers.formatEther(campaign[4].toString());
 
-      const status = await funding_contract.getState(goalEther, raisedEther);
+      const status = await funding_contract.getState(ethers.parseEther(goalEther), ethers.parseEther(raisedEther));
 
       const fileUuid = campaign[8];
+      if (fileUuid == 'uuid') {
+        continue;
+      }
       let ipfsUrl = '';
       const response = await apillonStorageAPI.get(`/buckets/${bucketUUID}/files/${fileUuid}`);
       if (response.data.data.link == null) {
@@ -149,6 +152,7 @@ app.get('/campaigns', async (req, res) => {
         active: campaign[5],
         contributors: campaign[6].length, // Assuming campaign[6] is an array of addresses
         ipfsUrl: ipfsUrl,
+        status: status
       });
     }
 
@@ -164,8 +168,6 @@ app.post('/contribute', async (req, res) => {
   console.log(amount, campaignId, account);
 
   try {
-    const tx = await funding_contract.contribute(campaignId, { value: ethers.parseEther(amount) });
-    await tx.wait();
 
     const tx2 = await reputation_contract.mint(account, amount * 1e3);
     await tx2.wait();

@@ -16,7 +16,7 @@ module.exports = {
     },
     sepolia: {
       url: "https://sepolia.infura.io/v3/9a5a23759f5e4e76ada3a165099a792d",
-      accounts: [process.env.PRIVATE_KEY, 'e12498ff573a8104f5b221c0dd8d278e6e0d25e8cdc178343981f2f24664e46c', '2cff09fba040b85c0ddee97dbe9443aea1c8c58d9b78246adff14a7ac7e538b8']
+      accounts: [process.env.PRIVATE_KEY, 'e12498ff573a8104f5b221c0dd8d278e6e0d25e8cdc178343981f2f24664e46c', '2cff09fba040b85c0ddee97dbe9443aea1c8c58d9b78246adff14a7ac7e538b8', '3e7e6a5c185279d5cac104431ed7d67eaa9d25cced8fa2da2548dde7317bb4a5']
     }
   },
   etherscan: {

@@ -45,7 +45,7 @@ function Home() {
           const provider = new ethers.providers.Web3Provider(window.ethereum);
           const signer = provider.getSigner();
           const fundingContract = new ethers.Contract(
-              '0xA30Dc48595FF3c7a1FDE94DA24CF6AFd7ED0c9FF',
+              '0x5Bc82216107ea117d700B9AC1D2790e9388B77C4',
               funding.abi,
               signer
           );
@@ -102,10 +102,13 @@ function Home() {
         campaignId,
         account
       });
+      const tx = await contract.contribute(campaignId, { value: ethers.utils.parseEther(amount) });
+      await tx.wait();
+      console.log('Contribution successful!');
       console.log(response.data);
     } catch (error) {
       console.error('Error contributing to campaign:', error);
-    }
+    } 
   };
 
   const handleToggleActive = async (campaignId) => {
@@ -141,6 +144,7 @@ function Home() {
             <img src={campaign.ipfsUrl} style={{ width: '100px' }} alt="Campaign" />
             <h3>{campaign.title}</h3>
             <p>{campaign.description}</p>
+            <h5>Status: {campaign.status}</h5>
             <p><strong>Owner:</strong> {campaign.owner}</p>
             <p><strong>Goal:</strong> {campaign.goal} ETH</p>
             <p><strong>Raised:</strong> {campaign.raised} ETH</p>
