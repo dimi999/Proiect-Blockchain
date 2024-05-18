@@ -50,9 +50,10 @@ app.post('/profile', async (req, res) => {
   const ethPrice = ethers.formatEther(gasPrice * estimatedGas);
 
   if (ethPrice < 0.001) {
-    const user = await user_contract.getUser(address);
+    let user = await user_contract.getUser(address);
+    const balance = await reputation_contract.balanceOf(address);
     console.log("User: ", user);
-    res.send(user);
+    res.send({user, balance});
   } else {
     res.send(['Error: Fetching data is too expensive', '', '', '']);
   }

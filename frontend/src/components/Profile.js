@@ -5,7 +5,7 @@ import { ethers } from 'ethers';
 import axios from 'axios';
 
 function Profile() {
-const [data, setData] = useState([]);
+const [data, setData] = useState({user: ['', '', '', ''], balance: 0});
 const [contract, setContract] = useState(null);
 const [account, setAccount] = useState(null);
 const [userProfile, setUserProfile] = useState(null);
@@ -29,7 +29,8 @@ useEffect(() => {
     })
       .then((response) => response.json())
       .then((data) => {
-        if(data != undefined && data[0] != undefined && data[0].indexOf('Error') != -1)
+        console.log(data);
+        if(data != null && data.user[0] != undefined && data.user[0].indexOf('Error') != -1)
           setError(data[0])
         else setData(data)
       })
@@ -93,23 +94,25 @@ useEffect(() => {
   return (
     <div>
       <h2>Profile</h2>
+      <p>Campaigns created: {data.user[4]}</p>
+      <p>Reputation points: {data.balance}</p>
       <form onSubmit={handleSubmit}>
         {/* Your form fields go here */}
         <label>
           Email:
-          <input type="email" name="email" defaultValue={data[3]}/>
+          <input type="email" name="email" defaultValue={data.user[3]}/>
         </label>
         <br />
         <label>
           Name:
-          <input type="text" name="nume" defaultValue={data[2]}/>
+          <input type="text" name="nume" defaultValue={data.user[2]}/>
         </label>
         <br />
         <p style={{ color: 'red', fontWeight: 'bold' }}>
           {error}
         </p>
         <br />
-        <button type="submit">Create Project</button>
+        <button type="submit">Update profile</button>
       </form>
     </div>
   );
